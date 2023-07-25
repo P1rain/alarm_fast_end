@@ -68,13 +68,15 @@ class DB:
         user_id = user_object.user_id
         user_pw = user_object.user_pw
         user_nickname = user_object.user_nickname
-        users_id = c.execute(f"select * from user where user_number = '{user_number}'").fetchone()
+        c.execute(f"select * from user_list where user_number = '{user_number}'")
+        users_id = c.fetchone()
         if users_id is None:
             c.execute(
-                f"insert into user values ('{user_number}', '{user_id}', '{user_pw}', '{user_nickname}')")
+                f"insert into user_list values ('{user_number}', '{user_id}', '{user_pw}', '{user_nickname}')")
             self.commit_db()
             # 정렬 안함
-            inserted_user = c.execute("select * from user").fetchone()
+            c.execute("select * from user")
+            inserted_user = c.fetchone()
             inserted_user_obj = User(*inserted_user)
             self.end_conn()
             return inserted_user_obj
@@ -88,9 +90,10 @@ class DB:
         user_id = user_object.user_id
         user_pw = user_object.user_pw
         user_name = user_object.user_nickname
-        c.execute(f"update user set user_id='{user_id}', user_pw = '{user_pw}', user_name='{user_name}')")
+        c.execute(f"update user_list set user_id='{user_id}', user_pw = '{user_pw}', user_name='{user_name}')")
         self.commit_db()
-        updated_user = c.execute(f"select * from user where user_id = '{user_id}'").fetchone()
+        c.execute(f"select * from user_list where user_id = '{user_id}'")
+        updated_user = c.fetchone()
         updated_user_obj = User(*updated_user)
         self.end_conn()
         return updated_user_obj
@@ -98,11 +101,9 @@ class DB:
     # 로그인 기능
     def user_log_in(self, login_id, login_pw):
         c = self.start_conn()
-        print(1)
-        exist_user = c.execute(
-            f'select * from tb_user where user_id = "{login_id}" and user_pw = "{login_pw}"').fetchone()
+        c.execute(f"select * from user_list where user_id = '{login_id}' and user_pw = '{login_pw}'")
+        exist_user = c.fetchone()
         self.end_conn()
-        print(2)
         if exist_user is not None:
             print('로그인 성공')
             login_user_obj = User(*exist_user)
@@ -114,7 +115,8 @@ class DB:
     # 아이디 중복체크
     def check_join_id(self, inserted_id):
         c = self.start_conn()
-        username_id = c.execute(f"select * from user where user_id = '{inserted_id}'").fetchone()
+        c.execute(f"select * from user_list where user_id = '{inserted_id}'")
+        username_id = c.fetchone()
         if username_id is None:
             return True
         else:
@@ -126,7 +128,8 @@ class DB:
         if useable_id is False:
             return False
         c = self.start_conn()
-        last_user_row = c.execute('select * from user order by user_number desc limit 1').fetchone()
+        c.execute('select * from user_list order by user_number desc limit 1')
+        last_user_row = c.fetchone()
         if last_user_row is None:
             user_number = 1
         else:

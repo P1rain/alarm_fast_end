@@ -1,10 +1,6 @@
 import json
 
-from DB.class_book import Book
-from DB.class_manager_info import Manager
-from DB.class_rental import Rental
-from DB.class_reservation import Reservation
-from DB.class_user import User
+from DataBase.class_user import User
 
 
 class ObjEncoder(json.JSONEncoder):
@@ -71,16 +67,8 @@ class ObjDecoder(json.JSONDecoder):
         if isinstance(dict_obj, str):
             dict_obj = json.loads(dict_obj)
         assert isinstance(dict_obj, dict)
-        if "book_writer" in dict_obj.keys():
-            return Book(**dict_obj)
-        elif "book_rental_date" in dict_obj.keys():
-            return Rental(**dict_obj)
-        elif "return_completed_date" in dict_obj.keys():
-            return Reservation(**dict_obj)
-        elif "user_name" in dict_obj.keys():
+        if "user_name" in dict_obj.keys():
             return User(**dict_obj)
-        elif "mng_id" in dict_obj.keys():
-            return Manager(**dict_obj)
 
     def list_mapper(self, list_obj):
         assert isinstance(list_obj, list)
@@ -92,7 +80,7 @@ class ObjDecoder(json.JSONDecoder):
 
 
 if __name__ == '__main__':
-    msg_1 = Book('집으로 가는길', 'kdt23000001', '박선생', "소미", '2023.07')
+
     msg_2 = User('집으로 가는길', 'kdt23000001', '박선생', "소미", '2023.07')
 
     msg_list = [msg_1, msg_2]
