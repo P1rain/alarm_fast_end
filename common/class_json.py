@@ -67,7 +67,7 @@ class ObjDecoder(json.JSONDecoder):
         if isinstance(dict_obj, str):
             dict_obj = json.loads(dict_obj)
         assert isinstance(dict_obj, dict)
-        if "user_name" in dict_obj.keys():
+        if "user_nickname" in dict_obj.keys():
             return User(**dict_obj)
 
     def list_mapper(self, list_obj):

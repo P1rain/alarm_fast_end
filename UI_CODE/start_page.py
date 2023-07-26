@@ -11,7 +11,7 @@ class AlarmStart(QWidget):
     def __init__(self, client_app=ClientApp):
         isinstance(client_app, ClientApp)
         super().__init__()
-        loadUi('./ui_file/AR_start_page.ui', self)
+        loadUi('../ui_file/AR_start_page.ui', self)
         self.client_app = client_app
         self.window_option()
         self.btn_event()

@@ -34,8 +34,8 @@ class AlarmLogin(QWidget):
         self.stackedWidget.setCurrentIndex(0)
         self.error_lbl.setText("")
         self.error_lbl_2.setText("")
-        self.ar_list = ['./UI_img/알람시계.png', './UI_img/알람시계(좌).png', './UI_img/알람시계.png', './UI_img/알람시계(우).png']
-        self.ar_list2 = ['./UI_img/늦잠3.png', './UI_img/캡처.png']
+        self.ar_list = ['../UI_img/알람시계.png', '../UI_img/알람시계(좌).png', '../UI_img/알람시계.png', '../UI_img/알람시계(우).png']
+        self.ar_list2 = ['../UI_img/늦잠3.png', '../UI_img/캡처.png']
 
     def qtimer_event(self):
         """qtimer 실행 함수"""

@@ -33,11 +33,11 @@ class AlarmMiniGame(QDialog):
         self.btn_count += 1
         self.label_3.setText(f'{self.btn_count}/10')
         if self.btn_count == 3:
-            self.egg_lbl.setPixmap(QPixmap('./ui_img/달걀2.png'))
+            self.egg_lbl.setPixmap(QPixmap('../ui_img/달걀2.png'))
         elif self.btn_count == 5:
-            self.egg_lbl.setPixmap(QPixmap('./ui_img/달걀3.png'))
+            self.egg_lbl.setPixmap(QPixmap('../ui_img/달걀3.png'))
         elif self.btn_count == 8:
-            self.egg_lbl.setPixmap(QPixmap('./ui_img/달걀4.png'))
+            self.egg_lbl.setPixmap(QPixmap('../ui_img/달걀4.png'))
         elif self.btn_count == 10:
             self.play_alarm()
             self.stackedWidget.setCurrentIndex(1)
@@ -45,7 +45,7 @@ class AlarmMiniGame(QDialog):
     def play_alarm(self):
         """알람음 설정 / 다이얼로그가 켜지는 순간부터 미니게임 완료할때까지 무한재생"""
         pygame.init()
-        sound_ = pygame.mixer.Sound('./sound/메이플스토리.mp3')
+        sound_ = pygame.mixer.Sound('../sound/메이플스토리.mp3')
         sound_.play(-1)
         if self.btn_count == 10:
             pygame.quit()
