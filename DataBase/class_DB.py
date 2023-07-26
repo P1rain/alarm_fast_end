@@ -122,11 +122,28 @@ class DB:
         else:
             return False
 
+    # 닉네임 중복 체크
+    def check_join_nickname(self, inserted_nickname):
+        c = self.start_conn()
+        c.execute(f"select * from user_list where user_nickname = '{inserted_nickname}'")
+        user_nickname = c.fetchone()
+        if user_nickname is None:
+            return True
+        else:
+            return False
+
     # 회원가입 요청
     def user_sign_up(self, user_id, user_pw, user_nickname):
         useable_id = self.check_join_id(user_id)
-        if useable_id is False:
-            return False
+        userable_nickname = self.check_join_nickname(user_nickname)
+        if useable_id is False and userable_nickname is False:
+            return "00"
+        elif useable_id is True and userable_nickname is False:
+            return "01"
+        elif useable_id is False and userable_nickname is True:
+            return "10"
+        else:
+            "11"
         c = self.start_conn()
         c.execute('select * from user_list order by user_number desc limit 1')
         last_user_row = c.fetchone()

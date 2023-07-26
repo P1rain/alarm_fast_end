@@ -1,7 +1,6 @@
 class Alarm:
-    def __init__(self, user_id, alarm_name, alarm_time, alarm_date, alarm_day_of_the_week, alarm_song):
+    def __init__(self, user_id, alarm_time, alarm_date, alarm_day_of_the_week, alarm_song):
         self.user_id = user_id
-        self.alarm_name = alarm_name
         self.alarm_time = alarm_time
         self.alarm_date = alarm_date
         self.alarm_day_of_the_week = alarm_day_of_the_week
@@ -16,13 +15,9 @@ class Alarm:
     def __eq__(self, other):
         if isinstance(other, Alarm) and \
                 self.user_id == other.user_id and \
-                self.alarm_name == other.alarm_name and \
                 self.alarm_time == other.alarm_time and \
                 self.alarm_date == other.alarm_date and \
                 self.alarm_day_of_the_week == other.alarm_day_of_the_week and \
                 self.alarm_song == other.alarm_song:
             return True
         return False
-
-    def __lt__(self, other):
-        return self.alarm_name < other.alarm_name
