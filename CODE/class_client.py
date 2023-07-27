@@ -8,15 +8,13 @@ from DataBase.class_msg import Message
 
 
 class ClientApp:
-    HOST = '127.0.0.1'
+    HOST = '10.10.20.115'
     PORT = 9999
     BUFFER = 50000
     FORMAT = "utf-8"
     HEADER_LENGTH = 30
 
     log_in = "log_in"
-    check_join_id = "check_join_id"
-    check_join_nickname = "check_join_nickname"
     join_user = "join_user"
     send_chatbot = "send_chatbot"
     send_all = "send_all"
@@ -53,7 +51,7 @@ class ClientApp:
 
     # 챗봇에게 보내는 메세지
     def send_msg_chatbot(self, msg, send_time):
-        data_msg = Message(self.user_id, msg, send_time)
+        data_msg = Message(self.user_id, None, msg, send_time)
         data_msg_str = self.encoder.toJSON_as_binary(data_msg)
         header_data = self.send_chatbot
         self.fixed_volume(header_data, data_msg_str)
@@ -61,7 +59,6 @@ class ClientApp:
     # 전체채팅
     def send_msg_all(self, msg, send_time):
         data_msg = Message(self.user_id, self.user_nickname, msg, send_time)
-        print(data_msg)
         data_msg_str = self.encoder.toJSON_as_binary(data_msg)
         header_data = self.send_all
         self.fixed_volume(header_data, data_msg_str)
@@ -94,4 +91,9 @@ class ClientApp:
 
             # 챗봇 메세지
             if response_header == self.send_chatbot:
-                self.client_widget.chatting_signal.emit(response_data)
+                self.client_widget.chatbot_signal.emit(response_data)
+
+            # 전체 채팅
+            if response_header == self.send_all:
+                print(response_data, "들어오나요?")
+                self.client_widget.user_chatting_signal.emit(response_data)

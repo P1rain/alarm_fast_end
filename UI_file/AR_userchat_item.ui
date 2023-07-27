@@ -10,6 +10,12 @@
     <height>60</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>410</width>
+    <height>60</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -21,6 +27,12 @@
      <width>410</width>
      <height>60</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);</string>
@@ -86,6 +98,9 @@ border-style:solid;
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

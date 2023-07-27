@@ -18,8 +18,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>410</width>
-    <height>60</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -98,6 +98,9 @@ border-style:solid;
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

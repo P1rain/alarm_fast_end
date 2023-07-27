@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="bot_page">
     <widget class="QWidget" name="widget" native="true">
@@ -248,10 +248,16 @@ border-bottom-right-radius:10px;
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">border-color: rgb(170, 170, 255);
+       <string notr="true">QScrollArea#scrollArea_3{border-color: rgb(170, 170, 255);
 border-width:1px;
 border-style:solid;
-border-radius: 10px;</string>
+border-radius: 10px;}</string>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="widgetResizable">
        <bool>true</bool>

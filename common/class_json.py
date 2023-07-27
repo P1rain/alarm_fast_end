@@ -1,6 +1,8 @@
 import json
 
+from DataBase.class_alarm import Alarm
 from DataBase.class_user import User
+from DataBase.class_msg import Message
 
 
 class ObjEncoder(json.JSONEncoder):
@@ -67,8 +69,12 @@ class ObjDecoder(json.JSONDecoder):
         if isinstance(dict_obj, str):
             dict_obj = json.loads(dict_obj)
         assert isinstance(dict_obj, dict)
-        if "user_nickname" in dict_obj.keys():
+        if "send_msg" in dict_obj.keys():
+            return Message(**dict_obj)
+        elif "user_number" in dict_obj.keys():
             return User(**dict_obj)
+        elif "alarm_id" in dict_obj.keys():
+            return Alarm(**dict_obj)
 
     def list_mapper(self, list_obj):
         assert isinstance(list_obj, list)

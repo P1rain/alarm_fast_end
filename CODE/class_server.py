@@ -1,8 +1,10 @@
 import os
+import threading
 from multiprocessing import Process
 from socket import *
-from threading import Thread, Event
+from threading import Thread, Event, Timer
 from DataBase.class_DB import DB
+from DataBase.class_alarm import Alarm
 from common.class_json import *
 import select
 import re
@@ -10,7 +12,7 @@ import datetime
 
 
 class Server:
-    HOST = '127.0.0.1'
+    HOST = '10.10.20.115'
     PORT = 9999
     BUFFER = 50000
     FORMAT = "utf-8"
@@ -52,6 +54,10 @@ class Server:
         self.run_signal = True
         self.thread_for_run = Thread(target=self.run)
         self.thread_for_run.start()
+        # 이미 기간이 지난 알람 지우기 및 알람 시그널 보내주기
+        self.thread_alarm_signal = Thread(target=self.alarm_signal)
+        self.thread_alarm_signal.start()
+
 
     def stop(self):
         self.run_signal = False
@@ -89,6 +95,21 @@ class Server:
                 self.sockets_list.remove(notified_socket)
                 del self.clients[notified_socket]
 
+    # 1분 마다 돌고 알람이 울릴 시간이 되면 클라이언트한태 정보를 보냄
+    def alarm_signal(self):
+        now_sec = datetime.datetime.today().strftime('%S')
+        print(now_sec)
+        if now_sec == "00":
+            # 알람 시간 확인
+            now_time = datetime.datetime.today().strftime('%H:%M')
+            alarm_info = self.db_conn.search_alarm(now_time)
+            print(alarm_info)
+            threading.Timer(60, self.alarm_signal).start()
+        elif now_sec == "01":
+            threading.Timer(59, self.alarm_signal).start()
+        else:
+            threading.Timer(1, self.alarm_signal).start()
+
     # 클라이언트로 정보 전달
     def send_message(self, client_socket: socket, result_):
         client_socket.send(result_)
@@ -106,6 +127,7 @@ class Server:
 
 
     # 메시지 내용에서 정보 뽑아오기
+    # 클레스 파일로 뺼것
     def alarm_time_data(self, rerequest_data):
         msg = rerequest_data.replace(' ', '')
         now = datetime.datetime.now()
@@ -117,17 +139,18 @@ class Server:
             time_cut = re.split(r'[:]', time_int[0])
             hour = int(time_cut[0])
             minute = int(time_cut[1])
+            set_date = now
             # 정상적으로 시간이 들어왔나
             if hour < 24:
                 # 현재시간과 알람 설정 시간 비교
                 if hour < now_hour:
-                    set_date = now + datetime.timedelta(days=1)
+                    set_date = set_date + datetime.timedelta(days=1)
             else:
                 return False, False
             if minute < 60:
-                if (minute < now_minute) and (hour == now_hour):
-                    set_date = now + datetime.timedelta(days=1)
-                set_day = set_date.strftime("%m.%d")
+                if (minute <= now_minute) and (hour == now_hour):
+                    set_date = set_date + datetime.timedelta(days=1)
+                set_day = set_date.strftime("%Mm.%d")
 
                 return set_day, time_cut[0] + ":" + time_cut[1]
             else:
@@ -167,7 +190,7 @@ class Server:
                 set_date = now + datetime.timedelta(days=1)
             else:
                 set_date = now
-            if (int(minute) < now_minute) and (int(hour) == now_hour):
+            if (int(minute) <= now_minute) and (int(hour) == now_hour):
                 set_date = now + datetime.timedelta(days=1)
             set_day = set_date.strftime("%m.%d")
             return set_day, hour + ":" + minute
@@ -206,7 +229,7 @@ class Server:
             result_ = self.db_conn.user_log_in(object_.user_id, object_.user_pw)
             if result_ is False:
                 response_header = self.log_in
-                response_data = self.FALSE
+                response_data = self.dot_encoded
                 return_result = self.fixed_volume(response_header, response_data)
                 self.send_message(client_socket, return_result)
             else:
@@ -224,7 +247,31 @@ class Server:
             self.send_message(client_socket, return_result)
 
         # 메시지 내용 알람화
-        elif request_header == self.alarm_setting:
+        elif request_header == self.send_chatbot:
             object_ = self.decoder.binary_to_obj(request_data)
             day, time = self.alarm_time_data(object_.send_msg)
-            print(day, time)
+            response_header = self.send_chatbot
+            if (day is False) or (time is False):
+                send_msg = '알수 없는 내용이에요.\n다시 입력해 주시길 바랍니다.'
+                return_result = self.fixed_volume(response_header, send_msg)
+                self.send_message(client_socket, return_result)
+            else:
+                alarm_data = Alarm(None, object_.user_id, time, day, None, None)
+                result_ = self.db_conn.alarm_setting(alarm_data)
+                user_nick_name = self.db_conn.search_nickname(result_.user_id)
+                send_msg = f"{user_nick_name}님의 알람이 {result_.alarm_date}일 {result_.alarm_time}에 맞춰졌습니다."
+                return_result = self.fixed_volume(response_header, send_msg)
+                self.send_message(client_socket, return_result)
+
+        # 전체 채팅
+        elif request_header == self.send_all:
+            response_header = self.send_all
+            socket_list = self.sockets_list.copy()
+            print(1, socket_list)
+            print(2, self.sockets_list)
+            socket_list.remove(self.server_socket)
+            socket_list.remove(client_socket)
+            for socket_ in socket_list:
+                return_result = self.fixed_volume(response_header, request_data)
+                self.send_message(socket_, return_result)
+

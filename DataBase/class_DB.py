@@ -1,5 +1,6 @@
 import psycopg2 as pg
 
+from DataBase.class_alarm import Alarm
 from DataBase.class_user import User
 # from DataBase.class_alarm import Alarm
 
@@ -42,7 +43,6 @@ class DB:
         CREATE TABLE alarm_data (
             "alarm_id"	INTEGER,
             "user_number"	INTEGER,
-            "alarm_name"	TEXT,
             "alarm_time"	TEXT,
             "alarm_date"	TEXT,
             "alarm_day_of_the_weak"	TEXT,
@@ -83,6 +83,30 @@ class DB:
         else:
             updated_user_obj = self.update_user(user_object)
             return updated_user_obj
+
+    def insert_alarm_data(self, alarm_obj: Alarm):
+        c = self.start_conn()
+        alarm_id = alarm_obj.alarm_id
+        print(alarm_id)
+        user_id = alarm_obj.user_id
+        alarm_time = alarm_obj.alarm_time
+        alarm_date = alarm_obj.alarm_date
+        alarm_day_of_the_week = alarm_obj.alarm_day_of_the_week
+        alarm_song = alarm_obj.alarm_song
+        c.execute(f"select * from alarm_data where alarm_id = '{alarm_id}'")
+        alarms_id = c.fetchone()
+        if alarms_id is None:
+            c.execute(
+                f"insert into alarm_data values ('{alarm_id}', '{user_id}', '{alarm_time}', '{alarm_date}', '{alarm_day_of_the_week}','{alarm_song}')")
+            self.commit_db()
+            # 정렬 안함
+            c.execute("select * from alarm_data")
+            inserted_alarm = c.fetchone()
+            inserted_alarm_obj = Alarm(*inserted_alarm)
+            self.end_conn()
+            return inserted_alarm_obj
+        else:
+            return False
 
     # user테이블 업데이트
     def update_user(self, user_object: User):
@@ -156,17 +180,42 @@ class DB:
         sing_up_obj = self.insert_user(sign_up_user_obj)
         return sing_up_obj
 
+    # 닉네임 찾기
+    def search_nickname(self, user_id):
+        c = self.start_conn()
+        c.execute(f"select user_nickname from user_list where user_id = '{user_id}'")
+        user_nick_name = c.fetchone()
+        self.end_conn()
+        return user_nick_name[0]
+
     # 알림 설정
-    # def alarm_setting(self, user_object: Alarm):
-    #     user_id = user_object.user_id
-    #     alarm_name = user_object.alarm_name
-    #     alarm_time = user_object.alarm_time
-    #     alarm_date = user_object.alarm_date
-    #     alarm_day_of_the_week = user_object.alarm_day_of_the_week
-    #     alarm_song = user_object.alarm_song
-    #     c = self.start_conn()
+    def alarm_setting(self, user_object: Alarm):
+        user_id = user_object.user_id
+        alarm_time = user_object.alarm_time
+        alarm_date = user_object.alarm_date
+        alarm_day_of_the_week = user_object.alarm_day_of_the_week
+        alarm_song = user_object.alarm_song
+        c = self.start_conn()
+        c.execute('select * from alarm_data order by alarm_id desc limit 1')
+        last_alarm_row = c.fetchone()
+        if last_alarm_row is None:
+            alarm_id = 1
+        else:
+            alarm_id = last_alarm_row[0] + 1
+        sign_up_alarm_obj = Alarm(alarm_id, user_id, alarm_time, alarm_date, alarm_day_of_the_week, alarm_song)
+        self.end_conn()
+        alarm_up_obj = self.insert_alarm_data(sign_up_alarm_obj)
+        if alarm_up_obj is False:
+            return False
+        return alarm_up_obj
 
-
+    # 알람 찾기
+    def search_alarm(self, time):
+        c = self.start_conn()
+        c.execute(f"select * from alarm_data where alarm_time = '{time}'")
+        alarm_info = c.fetchall()
+        self.end_conn()
+        return alarm_info
     # 알람 수정
 
     # 알람 취소
