@@ -106,10 +106,12 @@ class Server:
             # 알람 정보 찾아오기
             alarm_info = self.db_conn.search_alarm(now_date, now_time)
             for i in alarm_info:
-                print(i)
                 header_msg = self.time_to_alarm
-                data_obj =
-
+                data_obj = self.encoder.toJSON_as_binary(i)
+                return_result = self.fixed_volume(header_msg, data_obj)
+                for client_socket in self.sockets_list:
+                    if self.server_socket != client_socket:
+                        client_socket.send(return_result)
             # 현재시간보다 뒤에있는 알람들 다 삭제
             self.db_conn.del_alarm(now_date, now_time)
             # 60초 뒤에 쓰레드 다시 돌리기

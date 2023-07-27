@@ -18,6 +18,7 @@ class ClientApp:
     join_user = "join_user"
     send_chatbot = "send_chatbot"
     send_all = "send_all"
+    time_to_alarm = "time_to_alarm"
 
     def __init__(self):
         self.user_id = None
@@ -97,3 +98,11 @@ class ClientApp:
             if response_header == self.send_all:
                 print(response_data, "들어오나요?")
                 self.client_widget.user_chatting_signal.emit(response_data)
+
+            # 알림 받는가 테스트
+            if response_header == self.time_to_alarm:
+                alarm_obj = self.decoder.binary_to_obj(response_data)
+                if alarm_obj.user_id == self.user_id:
+                    self.client_widget.alarm_signal.emit(response_data)
+                else:
+                    pass

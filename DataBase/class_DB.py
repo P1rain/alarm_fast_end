@@ -211,11 +211,15 @@ class DB:
 
     # 알람 찾기
     def search_alarm(self, date, time):
+        alarm_info_list = list()
         c = self.start_conn()
         c.execute(f"select * from alarm_data where alarm_time = '{time}' and alarm_date = '{date}'")
         alarm_info = c.fetchall()
         self.end_conn()
-        return alarm_info
+        for i in alarm_info:
+            alarm_obj = Alarm(*i)
+            alarm_info_list.append(alarm_obj)
+        return alarm_info_list
 
     # 알람 삭제, 취소
     def del_alarm(self, date, time):

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="bot_page">
     <widget class="QWidget" name="widget" native="true">
@@ -249,7 +249,7 @@ border-bottom-right-radius:10px;
       </property>
       <property name="styleSheet">
        <string notr="true">QScrollArea#scrollArea_3{border-color: rgb(170, 170, 255);
-border-width:1px;
+border-width:2px;
 border-style:solid;
 border-radius: 10px;}</string>
       </property>
@@ -267,8 +267,8 @@ border-radius: 10px;}</string>
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>428</width>
-         <height>388</height>
+         <width>426</width>
+         <height>386</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -429,12 +429,15 @@ border-style:solid;
        <property name="text">
         <string>      군대 기상 나팔소리</string>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_2">
        <property name="geometry">
         <rect>
          <x>80</x>
-         <y>77</y>
+         <y>72</y>
          <width>221</width>
          <height>35</height>
         </rect>
@@ -461,7 +464,7 @@ border-style:solid;
        <property name="geometry">
         <rect>
          <x>80</x>
-         <y>130</y>
+         <y>122</y>
          <width>221</width>
          <height>35</height>
         </rect>
@@ -488,7 +491,7 @@ border-style:solid;
        <property name="geometry">
         <rect>
          <x>80</x>
-         <y>180</y>
+         <y>175</y>
          <width>221</width>
          <height>35</height>
         </rect>
@@ -511,6 +514,107 @@ border-style:solid;
         <string>      Maple Story</string>
        </property>
       </widget>
+      <widget class="QRadioButton" name="radioButton_5">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>230</y>
+         <width>221</width>
+         <height>35</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>G마켓 산스 TTF Medium</family>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(100, 100, 100);
+border-width:0px;
+border-style:solid;
+</string>
+       </property>
+       <property name="text">
+        <string>      헤머벨 알람시계 소리</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="move_lbl">
+       <property name="geometry">
+        <rect>
+         <x>98</x>
+         <y>310</y>
+         <width>20</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>../UI_img/2995101.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>300</y>
+         <width>111</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>../UI_img/사람.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="move_lbl_2">
+       <property name="geometry">
+        <rect>
+         <x>128</x>
+         <y>370</y>
+         <width>20</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">border-color: rgb(255, 255, 255);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>../UI_img/2995101.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <zorder>label</zorder>
+      <zorder>radioButton</zorder>
+      <zorder>radioButton_2</zorder>
+      <zorder>radioButton_3</zorder>
+      <zorder>radioButton_4</zorder>
+      <zorder>radioButton_5</zorder>
+      <zorder>move_lbl</zorder>
+      <zorder>move_lbl_2</zorder>
      </widget>
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
@@ -584,7 +688,7 @@ border-radius:10px;
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>190</x>
+        <x>194</x>
         <y>48</y>
         <width>60</width>
         <height>60</height>
@@ -607,7 +711,7 @@ border-radius:10px;
      <widget class="QLabel" name="nickname_lbl">
       <property name="geometry">
        <rect>
-        <x>119</x>
+        <x>122</x>
         <y>111</y>
         <width>205</width>
         <height>28</height>
