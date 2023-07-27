@@ -87,20 +87,20 @@ class DB:
     def insert_alarm_data(self, alarm_obj: Alarm):
         c = self.start_conn()
         alarm_id = alarm_obj.alarm_id
-        print(alarm_id)
         user_id = alarm_obj.user_id
         alarm_time = alarm_obj.alarm_time
         alarm_date = alarm_obj.alarm_date
         alarm_day_of_the_week = alarm_obj.alarm_day_of_the_week
         alarm_song = alarm_obj.alarm_song
-        c.execute(f"select * from alarm_data where alarm_id = '{alarm_id}'")
+        c.execute(f"select * from alarm_data where alarm_time = '{alarm_time}' and user_id = '{user_id}' and "
+                  f"alarm_date = '{alarm_date}'")
         alarms_id = c.fetchone()
         if alarms_id is None:
             c.execute(
                 f"insert into alarm_data values ('{alarm_id}', '{user_id}', '{alarm_time}', '{alarm_date}', '{alarm_day_of_the_week}','{alarm_song}')")
             self.commit_db()
             # 정렬 안함
-            c.execute("select * from alarm_data")
+            c.execute(f"select * from alarm_data where alarm_id = '{alarm_id}'")
             inserted_alarm = c.fetchone()
             inserted_alarm_obj = Alarm(*inserted_alarm)
             self.end_conn()
@@ -210,13 +210,26 @@ class DB:
         return alarm_up_obj
 
     # 알람 찾기
-    def search_alarm(self, time):
+    def search_alarm(self, date, time):
         c = self.start_conn()
-        c.execute(f"select * from alarm_data where alarm_time = '{time}'")
+        c.execute(f"select * from alarm_data where alarm_time = '{time}' and alarm_date = '{date}'")
         alarm_info = c.fetchall()
         self.end_conn()
         return alarm_info
+
+    # 알람 삭제, 취소
+    def del_alarm(self, date, time):
+        c = self.start_conn()
+        c.execute(f"delete from alarm_data where alarm_date<='{date}' and alarm_time<='{time}'")
+        self.commit_db()
+        self.end_conn()
+        return True
+
     # 알람 수정
+
+    # 알람 기간 수정
+
+    # 알람 시간 수정
 
     # 알람 취소
 
@@ -224,8 +237,4 @@ class DB:
 
     # 알람 노래 수정
 
-    # 알람 기간 설정
 
-    # 알람 기간 수정
-
-    # 알람 시간 수정

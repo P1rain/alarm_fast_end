@@ -22,6 +22,7 @@ class Server:
     join_user = "join_user"
     send_chatbot = "send_chatbot"
     send_all = "send_all"
+    time_to_alarm = "time_to_alarm"
 
     pass_encoded = "pass"
     dot_encoded = "."
@@ -57,7 +58,6 @@ class Server:
         # 이미 기간이 지난 알람 지우기 및 알람 시그널 보내주기
         self.thread_alarm_signal = Thread(target=self.alarm_signal)
         self.thread_alarm_signal.start()
-
 
     def stop(self):
         self.run_signal = False
@@ -98,14 +98,30 @@ class Server:
     # 1분 마다 돌고 알람이 울릴 시간이 되면 클라이언트한태 정보를 보냄
     def alarm_signal(self):
         now_sec = datetime.datetime.today().strftime('%S')
-        print(now_sec)
+        print(datetime.datetime.now())
         if now_sec == "00":
             # 알람 시간 확인
             now_time = datetime.datetime.today().strftime('%H:%M')
-            alarm_info = self.db_conn.search_alarm(now_time)
-            print(alarm_info)
+            now_date = datetime.datetime.today().strftime('%m.%d')
+            # 알람 정보 찾아오기
+            alarm_info = self.db_conn.search_alarm(now_date, now_time)
+            for i in alarm_info:
+                print(i)
+                header_msg = self.time_to_alarm
+                data_obj =
+
+            # 현재시간보다 뒤에있는 알람들 다 삭제
+            self.db_conn.del_alarm(now_date, now_time)
+            # 60초 뒤에 쓰레드 다시 돌리기
             threading.Timer(60, self.alarm_signal).start()
         elif now_sec == "01":
+            # 알람 시간 확인
+            now_time = datetime.datetime.today().strftime('%H:%M')
+            now_date = datetime.datetime.today().strftime('%m.%d')
+            # 알람 정보 찾아오기
+            alarm_info = self.db_conn.search_alarm(now_date, now_time)
+            # 현재시간보다 뒤에있는 알람들 다 삭제
+            self.db_conn.del_alarm(now_date, now_time)
             threading.Timer(59, self.alarm_signal).start()
         else:
             threading.Timer(1, self.alarm_signal).start()
@@ -124,7 +140,6 @@ class Server:
     def alarm_day_of_the_week(self, rerequest_data):
         day_of_the_week_list = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
         msg = rerequest_data.replace(' ', '')
-
 
     # 메시지 내용에서 정보 뽑아오기
     # 클레스 파일로 뺼것
@@ -150,7 +165,7 @@ class Server:
             if minute < 60:
                 if (minute <= now_minute) and (hour == now_hour):
                     set_date = set_date + datetime.timedelta(days=1)
-                set_day = set_date.strftime("%Mm.%d")
+                set_day = set_date.strftime("%m.%d")
 
                 return set_day, time_cut[0] + ":" + time_cut[1]
             else:
@@ -256,19 +271,23 @@ class Server:
                 return_result = self.fixed_volume(response_header, send_msg)
                 self.send_message(client_socket, return_result)
             else:
+                # 알람 중복 체크
                 alarm_data = Alarm(None, object_.user_id, time, day, None, None)
                 result_ = self.db_conn.alarm_setting(alarm_data)
-                user_nick_name = self.db_conn.search_nickname(result_.user_id)
-                send_msg = f"{user_nick_name}님의 알람이 {result_.alarm_date}일 {result_.alarm_time}에 맞춰졌습니다."
-                return_result = self.fixed_volume(response_header, send_msg)
-                self.send_message(client_socket, return_result)
+                if result_ is False:
+                    send_msg = "이미 알람이 설정되어 있습니다."
+                    return_result = self.fixed_volume(response_header, send_msg)
+                    self.send_message(client_socket, return_result)
+                else:
+                    user_nick_name = self.db_conn.search_nickname(result_.user_id)
+                    send_msg = f"{user_nick_name}님의 알람이 {result_.alarm_date}일 {result_.alarm_time}에 맞춰졌습니다."
+                    return_result = self.fixed_volume(response_header, send_msg)
+                    self.send_message(client_socket, return_result)
 
         # 전체 채팅
         elif request_header == self.send_all:
             response_header = self.send_all
             socket_list = self.sockets_list.copy()
-            print(1, socket_list)
-            print(2, self.sockets_list)
             socket_list.remove(self.server_socket)
             socket_list.remove(client_socket)
             for socket_ in socket_list:
