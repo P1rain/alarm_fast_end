@@ -86,7 +86,6 @@ class ObjDecoder(json.JSONDecoder):
 
 
 if __name__ == '__main__':
-
     msg_2 = User('집으로 가는길', 'kdt23000001', '박선생', "소미", '2023.07')
 
     msg_list = [msg_1, msg_2]

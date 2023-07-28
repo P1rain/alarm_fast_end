@@ -209,7 +209,7 @@ class DB:
             return False
         return alarm_up_obj
 
-    # 알람 찾기
+    # 날짜 시간에 맞는 알람 찾기
     def search_alarm(self, date, time):
         alarm_info_list = list()
         c = self.start_conn()
@@ -221,6 +221,19 @@ class DB:
             alarm_info_list.append(alarm_obj)
         return alarm_info_list
 
+    # 회원이 설정한 알람 찾기
+    def search_user_setting_alarm(self, user_obj:User):
+        user_alarm_list = list()
+        c = self.start_conn()
+        user_id = user_obj.user_id
+        c.execute(f"select * from alarm_data where user_id = '{user_id}' order by alarm_date asc, alarm_time asc")
+        user_alarm_setting_info = c.fetchall()
+        self.end_conn()
+        for i in user_alarm_setting_info:
+            alarm_obj = Alarm(*i)
+            user_alarm_list.append(alarm_obj)
+        return user_alarm_list
+
     # 알람 삭제, 취소
     def del_alarm(self, date, time):
         c = self.start_conn()
@@ -229,16 +242,18 @@ class DB:
         self.end_conn()
         return True
 
-    # 알람 수정
+    # 알람 수정전에 변경되는 시간이 알람 설정이되어있는지 확인
 
+    # 알람 수정
+    def alarm_time_change(self, user_id, alarm_time, change_alarm_time):
+        c = self.start_conn()
+        c.execute(f"update alarm_data set alarm_time = '{change_alarm_time}' where user_id = '{user_id}' and "
+                  f"alarm_time = '{alarm_time}'")
+        self.commit_db()
+        self.end_conn()
+        return True
     # 알람 기간 수정
 
     # 알람 시간 수정
-
-    # 알람 취소
-
-    # 알람 노래설정
-
-    # 알람 노래 수정
 
 
