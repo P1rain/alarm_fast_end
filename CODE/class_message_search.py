@@ -24,6 +24,7 @@ class TimeSetting:
         msg = send_msg.replace(' ', '')
         many_time = '설정할 시간을 하나만 적어주시길 바랍니다.'
         no_time = '설정할 시간을 작성하지 않으셨습니다.'
+        week_over = '설정할 요일을 하나만 적어주세요'
 
         # : 의 앞뒤로 값이 들어간 경우의 시간확인
         if (len(re.findall(r'\d+:\d+', msg)) == 1) and (len(re.findall(r'\d+:', msg)) > 1):
@@ -33,10 +34,13 @@ class TimeSetting:
             time_int = re.findall(r'\d+:\d+', msg)
             time_cut = re.split(r'[:]', time_int[0])
             week_check = re.findall(r'\w요일', msg)
-            if 1 <= len(week_check) <= 7:
-                day_of_the_week = self.now.weekday()
-                data_msg = self.alarm_setting_time_day_of_the_week(day_of_the_week, time_cut[0]. time_cut[1])
+            # 요일 정보
+            if (len(week_check) == 1) and (week_check[0] in self.day_of_the_week_list):
+                day_of_the_week = self.day_of_the_week_list.index(week_check[0])
+                data_msg = self.alarm_setting_time_day_of_the_week(day_of_the_week, time_cut[0], time_cut[1])
                 return data_msg
+            elif len(week_check) > 1:
+                return week_over
             else:
                 data_msg = self.alarm_setting_time_only(time_cut[0], time_cut[1])
                 return data_msg
@@ -48,8 +52,17 @@ class TimeSetting:
         elif len(re.findall(r'\d+:', msg)) == 1:
             time_int = re.findall(r'\d+:', msg)
             time_cut = re.split(r'[:]', time_int[0])
-            data_msg = self.alarm_setting_time_only(time_cut[0])
-            return data_msg
+            week_check = re.findall(r'\w요일', msg)
+            # 요일 정보
+            if (len(week_check) == 1) and (week_check[0] in self.day_of_the_week_list):
+                day_of_the_week = self.day_of_the_week_list.index(week_check[0])
+                data_msg = self.alarm_setting_time_day_of_the_week(day_of_the_week, time_cut[0])
+                return data_msg
+            elif len(week_check) > 1:
+                return week_over
+            else:
+                data_msg = self.alarm_setting_time_only(time_cut[0])
+                return data_msg
 
         elif len(re.findall(r'\d+:', msg)) > 1:
             return many_time
@@ -73,16 +86,34 @@ class TimeSetting:
                 ('시' in re.findall(r'\d+(시|분)', msg)) and ('분' in re.findall(r'\d+(시|분)', msg)):
             hours_num = re.findall(r'\d+(?=시)', msg)
             minute_num = re.findall(r'\d+(?=분)', msg)
-            data_msg = self.alarm_setting_time_only(hours_num[0], minute_num[0])
-            return data_msg
+            week_check = re.findall(r'\w요일', msg)
+            # 요일 정보
+            if (len(week_check) == 1) and (week_check[0] in self.day_of_the_week_list):
+                day_of_the_week = self.day_of_the_week_list.index(week_check[0])
+                data_msg = self.alarm_setting_time_day_of_the_week(day_of_the_week, hours_num[0], minute_num[0])
+                return data_msg
+            elif len(week_check) > 1:
+                return week_over
+            else:
+                data_msg = self.alarm_setting_time_only(hours_num[0], minute_num[0])
+                return data_msg
 
         elif (len(re.findall(r'\d+(시|분)', msg)) > 2) and (len(re.findall(r'\d+(?=시|분)', msg)) > 2):
             return many_time
 
         elif (len(re.findall(r'\d+(시)', msg)) == 1) and ('시' in re.findall(r'\d+(시)', msg)):
             time_num = re.findall(r'\d+(?=시)', msg)
-            data_msg = self.alarm_setting_time_only(time_num[0])
-            return data_msg
+            week_check = re.findall(r'\w요일', msg)
+            # 요일 정보
+            if (len(week_check) == 1) and (week_check[0] in self.day_of_the_week_list):
+                day_of_the_week = self.day_of_the_week_list.index(week_check[0])
+                data_msg = self.alarm_setting_time_day_of_the_week(day_of_the_week, time_num[0])
+                return data_msg
+            elif len(week_check) > 1:
+                return week_over
+            else:
+                data_msg = self.alarm_setting_time_only(time_num[0])
+                return data_msg
 
     # 몇시간뒤,후의 기능
     def alarm_setting_after_hour_time(self, after_hour):
@@ -147,7 +178,7 @@ class TimeSetting:
             alarm_date = result_.alarm_date
             alarm_day_of_the_week = self.day_of_the_week_list[int(result_.alarm_day_of_the_week)]
             alarm_time = self.converter_time(result_.alarm_time)
-            return f'{user_nickname}님의 알람이 {alarm_date}일 {alarm_day_of_the_week}\n{alarm_time}에 맞춰졌습니다.'
+            return f'{user_nickname}님의 알람이 {alarm_date}일\n{alarm_time}에 맞춰졌습니다.'
 
     def alarm_setting_time_date(self, date, hour, minutes='00'):
         pass
@@ -163,8 +194,16 @@ class TimeSetting:
             hours = "0" + hours
         if len(minutes) == 1:
             minutes = "0" + minutes
-        alarm_data = Alarm(None, self.object_.user_id, hours+":"+minutes, None, day_of_the_week, None)
+        alarm_data = Alarm(None, self.object_.user_id, hours+":"+minutes, self.day_of_the_week_list[day_of_the_week], day_of_the_week, None)
         result_ = self.db_conn.alarm_setting(alarm_data)
+        if result_ is False:
+            return '이미 존재하는 알람입니다.\n다시 시도해주시길 바랍니'
+        else:
+            user_nickname = self.db_conn.search_nickname(result_.user_id)
+            alarm_date = self.day_of_the_week_list[day_of_the_week]
+            alarm_time = self.converter_time(result_.alarm_time)
+            return f'{user_nickname}님의 알람이 {alarm_date}\n{alarm_time}에 맞춰졌습니다.'
+
 
     def converter_time(self, time_data):
         time = time_data

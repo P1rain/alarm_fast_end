@@ -93,7 +93,7 @@ class DB:
         alarm_day_of_the_week = alarm_obj.alarm_day_of_the_week
         alarm_song = alarm_obj.alarm_song
         c.execute(f"select * from alarm_data where alarm_time = '{alarm_time}' and user_id = '{user_id}' and "
-                  f"alarm_date = '{alarm_date}'")
+                  f"alarm_day_of_the_weak = '{alarm_day_of_the_week}'")
         alarms_id = c.fetchone()
         if alarms_id is None:
             c.execute(
