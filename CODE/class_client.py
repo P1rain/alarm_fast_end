@@ -8,7 +8,8 @@ from DataBase.class_msg import Message
 
 
 class ClientApp:
-    HOST = '10.10.20.115'
+    # HOST = '10.10.20.115'
+    HOST = '127.0.0.1'
     PORT = 9999
     BUFFER = 50000
     FORMAT = "utf-8"

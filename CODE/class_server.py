@@ -12,7 +12,8 @@ import datetime
 
 
 class Server:
-    HOST = '10.10.20.115'
+    # HOST = '10.10.20.115'
+    HOST = '127.0.0.1'
     PORT = 9999
     BUFFER = 50000
     FORMAT = "utf-8"
@@ -141,7 +142,7 @@ class Server:
 
     # 메시지에서 요일 찾기
     def alarm_day_of_the_week(self, rerequest_data):
-        day_of_the_week_list = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+        day_of_the_week_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
         msg = rerequest_data.replace(' ', '')
 
     # 메시지 내용에서 정보 뽑아오기
@@ -151,52 +152,7 @@ class Server:
         now = datetime.datetime.now()
         now_hour = int(now.hour)
         now_minute = int(now.minute)
-        # : 의 앞뒤로 값이 들어간 경우의 시간확인
-        if len(re.findall(r'\d+:\d+', msg)) == 1:
-            time_int = re.findall(r'\d+:\d+', msg)
-            time_cut = re.split(r'[:]', time_int[0])
-            for i in range(len(time_cut)):
-                if len(time_cut[i]) == 1:
-                    time_cut[i] = "0" + time_cut[i]
-            hour = int(time_cut[0])
-            minute = int(time_cut[1])
-            set_date = now
-            # 정상적으로 시간이 들어왔나
-            if hour < 24:
-                # 현재시간과 알람 설정 시간 비교
-                if hour < now_hour:
-                    set_date = set_date + datetime.timedelta(days=1)
-            else:
-                return False, False
-            if minute < 60:
-                if (minute <= now_minute) and (hour == now_hour):
-                    set_date = set_date + datetime.timedelta(days=1)
-                set_day = set_date.strftime("%m.%d")
-
-                return set_day, time_cut[0] + ":" + time_cut[1]
-            else:
-                return False, False
-        # : 의 앞에만 값이 적혀있는 경우
-        elif len(re.findall(r'\d+:', msg)) == 1:
-            minute = "00"
-            time_int = re.findall(r'\d+:', msg)
-            time_cut = re.split(r'[:]', time_int[0])
-            # 9시를 09시로 변경
-            if len(time_cut[0]) == 1:
-                time_cut[0] = "0" + time_cut[0]
-            hour = int(time_cut[0])
-            if hour < 24:
-                # 현재시간과 알람 설정 시간 비교
-                if hour < now_hour:
-                    set_date = now + datetime.timedelta(days=1)
-                else:
-                    set_date = now
-                set_day = set_date.strftime("%m.%d")
-                return set_day, time_cut[0] + ":" + minute
-            else:
-                return False, False
-        # 채팅 내용중 시, 분으로 적은 내용이 있을경우 출력시킴
-        elif (len(re.findall(r'\d+(시|분)', msg)) == 2) and (len(re.findall(r'\d+(?=시|분)', msg)) == 2) and \
+        if (len(re.findall(r'\d+(시|분)', msg)) == 2) and (len(re.findall(r'\d+(?=시|분)', msg)) == 2) and \
                 ('시' in re.findall(r'\d+(시|분)', msg)) and ('분' in re.findall(r'\d+(시|분)', msg)):
             time_str = re.findall(r'\d+(시|분)', msg)
             time_num = re.findall(r'\d+(?=시|분)', msg)
@@ -224,13 +180,6 @@ class Server:
                 set_date = now + datetime.timedelta(days=1)
             set_day = set_date.strftime("%m.%d")
             return set_day, hour + ":" + minute
-        # 몇시간후의 기능
-        elif len(re.findall('\d+시간후|\d+시간뒤', msg)) == 1:
-            time_num = re.findall(r'\d+(?=시간후)|\d+(?=시간뒤)', msg)
-            set_date_time = now + datetime.timedelta(hours=int(time_num[0]))
-            set_day = set_date_time.strftime("%m.%d")
-            set_time = set_date_time.strftime("%H:%M")
-            return set_day, set_time
         # 시, 분을 적은것이 아닌 시간만 적은 경우
         elif (len(re.findall(r'\d+(시)', msg)) == 1) and ('시' in re.findall(r'\d+(시)', msg)):
             time_num = re.findall(r'(\d+)시', msg)
@@ -245,13 +194,6 @@ class Server:
                 return set_day, time_num[0] + ':00'
             else:
                 return False, False
-        # 몇분의 기능
-        elif len(re.findall('\d+분후|\d+분뒤', msg)) == 1:
-            time_num = re.findall(r'\d+(?=분후)|\d+(?=분뒤)', msg)
-            set_date_time = now + datetime.timedelta(minutes=int(time_num[0]))
-            set_day = set_date_time.strftime("%m.%d")
-            set_time = set_date_time.strftime("%H:%M")
-            return set_day, set_time
         else:
             return False, False
 
@@ -318,6 +260,7 @@ class Server:
             response_header = self.send_chatbot
             # 여기서 함수로 메시지 정보를 넘길꺼임 그리고 리턴으로 값을 받음
             return_msg = self.time_set.msg_interpret_data(object_)
+            print(return_msg)
             return_result = self.fixed_volume(response_header, return_msg)
             self.send_message(client_socket, return_result)
 

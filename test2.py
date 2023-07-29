@@ -37,8 +37,21 @@ import re
 # else:
 #     print(2)
 
-today = datetime.datetime.today()
-print(today.weekday())
+# today = datetime.datetime.today()
+# print(today.weekday())
+#
+# tomorrow = today + datetime.timedelta(days=1)
+# print(tomorrow.weekday())
 
-tomorrow = today + datetime.timedelta(days=1)
-print(tomorrow.weekday())
+# day_of_the_week_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
+#
+# a = '오늘은 정말 미칠것같은 토요일이에요'
+#
+# a = re.findall(r'\w요일', a)
+# print(a)
+
+
+if '월요일' < '12.31':
+    print(1)
+else:
+    print(2)
