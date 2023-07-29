@@ -2,6 +2,8 @@ import psycopg2 as pg
 
 from DataBase.class_alarm import Alarm
 from DataBase.class_user import User
+
+
 # from DataBase.class_alarm import Alarm
 
 
@@ -209,11 +211,11 @@ class DB:
             return False
         return alarm_up_obj
 
-    # 날짜 시간에 맞는 알람 찾기
-    def search_alarm(self, date, time):
+    # 요일에 맞는 알람 찾기
+    def search_alarm(self, week, time):
         alarm_info_list = list()
         c = self.start_conn()
-        c.execute(f"select * from alarm_data where alarm_time = '{time}' and alarm_date = '{date}'")
+        c.execute(f"select * from alarm_data where alarm_time = '{time}' and alarm_day_of_the_weak = '{week}'")
         alarm_info = c.fetchall()
         self.end_conn()
         for i in alarm_info:
@@ -222,7 +224,7 @@ class DB:
         return alarm_info_list
 
     # 회원이 설정한 알람 찾기
-    def search_user_setting_alarm(self, user_obj:User):
+    def search_user_setting_alarm(self, user_obj: User):
         user_alarm_list = list()
         c = self.start_conn()
         user_id = user_obj.user_id
@@ -234,8 +236,24 @@ class DB:
             user_alarm_list.append(alarm_obj)
         return user_alarm_list
 
-    # 알람 삭제, 취소
-    def del_alarm(self, date, time):
+    # 알람 삭제전 알람이 존재하는지 확인(날짜랑 시간으로 확인)
+    def search_alarm_data(self, user_id, date, time):
+        c = self.start_conn()
+        c.execute(
+            f"select * from alarm_data where alarm_time = '{time}' and alarm_date = '{date}' and user_id = '{user_id}'")
+        alarm_info = c.fetchone()
+        print(alarm_info)
+        if alarm_info is None:
+            self.end_conn()
+            return False
+        else:
+            c.execute(f"delete from alarm_data where alarm_date='{date}' and alarm_time='{time}' and user_id = '{user_id}'")
+            self.commit_db()
+            self.end_conn()
+            return True
+
+    # 시간 지난 알람 삭제, 취소
+    def before_del_alarm(self, date, time):
         c = self.start_conn()
         c.execute(f"delete from alarm_data where alarm_date<='{date}' and alarm_time<='{time}'")
         self.commit_db()
@@ -255,5 +273,3 @@ class DB:
     # 알람 기간 수정
 
     # 알람 시간 수정
-
-

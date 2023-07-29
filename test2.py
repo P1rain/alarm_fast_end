@@ -1,4 +1,5 @@
 import datetime
+import calendar
 import re
 
 # import re
@@ -49,9 +50,8 @@ import re
 #
 # a = re.findall(r'\w요일', a)
 # print(a)
-
-
-if '월요일' < '12.31':
-    print(1)
-else:
-    print(2)
+day = datetime.datetime.now() + datetime.timedelta(days=4)
+month = '12'
+month = month + datetime.timedelta(months=1)
+print(month)
+print(day.strftime('%d'))

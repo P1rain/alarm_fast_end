@@ -105,8 +105,9 @@ class Server:
             # 알람 시간 확인
             now_time = datetime.datetime.today().strftime('%H:%M')
             now_date = datetime.datetime.today().strftime('%m.%d')
+            now_week = datetime.datetime.today().weekday()
             # 알람 정보 찾아오기
-            alarm_info = self.db_conn.search_alarm(now_date, now_time)
+            alarm_info = self.db_conn.search_alarm(now_week, now_time)
             for i in alarm_info:
                 header_msg = self.time_to_alarm
                 data_obj = self.encoder.toJSON_as_binary(i)
@@ -115,7 +116,7 @@ class Server:
                     if self.server_socket != client_socket:
                         client_socket.send(return_result)
             # 현재시간보다 뒤에있는 알람들 다 삭제
-            self.db_conn.del_alarm(now_date, now_time)
+            self.db_conn.before_del_alarm(now_date, now_time)
             # 60초 뒤에 쓰레드 다시 돌리기
             threading.Timer(60, self.alarm_signal).start()
         elif now_sec == "01":
@@ -125,7 +126,7 @@ class Server:
             # 알람 정보 찾아오기
             alarm_info = self.db_conn.search_alarm(now_date, now_time)
             # 현재시간보다 뒤에있는 알람들 다 삭제
-            self.db_conn.del_alarm(now_date, now_time)
+            self.db_conn.before_del_alarm(now_date, now_time)
             threading.Timer(59, self.alarm_signal).start()
         else:
             threading.Timer(1, self.alarm_signal).start()
@@ -139,65 +140,6 @@ class Server:
         header_msg = f"{header:<{self.HEADER_LENGTH}}".encode(self.FORMAT)
         data_msg = f"{data:<{self.BUFFER - self.HEADER_LENGTH}}".encode(self.FORMAT)
         return header_msg + data_msg
-
-    # 메시지에서 요일 찾기
-    def alarm_day_of_the_week(self, rerequest_data):
-        day_of_the_week_list = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
-        msg = rerequest_data.replace(' ', '')
-
-    # 메시지 내용에서 정보 뽑아오기
-    # 클레스 파일로 뺼것
-    def alarm_time_data(self, rerequest_data):
-        msg = rerequest_data.replace(' ', '')
-        now = datetime.datetime.now()
-        now_hour = int(now.hour)
-        now_minute = int(now.minute)
-        if (len(re.findall(r'\d+(시|분)', msg)) == 2) and (len(re.findall(r'\d+(?=시|분)', msg)) == 2) and \
-                ('시' in re.findall(r'\d+(시|분)', msg)) and ('분' in re.findall(r'\d+(시|분)', msg)):
-            time_str = re.findall(r'\d+(시|분)', msg)
-            time_num = re.findall(r'\d+(?=시|분)', msg)
-            for j, k in zip(time_str, time_num):
-                if len(k) == 1:
-                    print(1, k)
-                    k = '0' + k
-                    print(int(k))
-                if (j == '분') and (int(k) < 60):
-                    print(k)
-                    minute = k
-                elif j == '분':
-                    return False, False
-                if (j == '시') and (int(k) < 24):
-                    print(k)
-                    hour = k
-                elif j == '시':
-                    return False, False
-            # 현재시간과 알람 설정 시간 비교
-            if int(hour) < now_hour:
-                set_date = now + datetime.timedelta(days=1)
-            else:
-                set_date = now
-            if (int(minute) <= now_minute) and (int(hour) == now_hour):
-                set_date = now + datetime.timedelta(days=1)
-            set_day = set_date.strftime("%m.%d")
-            return set_day, hour + ":" + minute
-        # 시, 분을 적은것이 아닌 시간만 적은 경우
-        elif (len(re.findall(r'\d+(시)', msg)) == 1) and ('시' in re.findall(r'\d+(시)', msg)):
-            time_num = re.findall(r'(\d+)시', msg)
-            if len(time_num[0]) == 1:
-                time_num[0] = "0" + time_num[0]
-            if int(time_num[0]) < 24:
-                if int(time_num[0]) <= now_hour:
-                    set_date = now + datetime.timedelta(days=1)
-                else:
-                    set_date = now
-                set_day = set_date.strftime("%m.%d")
-                return set_day, time_num[0] + ':00'
-            else:
-                return False, False
-        else:
-            return False, False
-
-    # 알
 
     def receive_message(self, client_socket: socket):
         try:
@@ -233,33 +175,18 @@ class Server:
             return_result = self.fixed_volume(response_header, result_)
             self.send_message(client_socket, return_result)
 
-        # 메시지 내용 알람화
-        # elif request_header == self.send_chatbot:
-        #     object_ = self.decoder.binary_to_obj(request_data)
-        #     response_header = self.send_chatbot
-        #     day, time = self.alarm_time_data(object_.send_msg)
-        #     if (day is False) or (time is False):
-        #         send_msg = '알수 없는 내용이에요.\n다시 입력해 주시길 바랍니다.'
-        #         return_result = self.fixed_volume(response_header, send_msg)
-        #         self.send_message(client_socket, return_result)
-        #     else:
-        #         # 알람 중복 체크
-        #         alarm_data = Alarm(None, object_.user_id, time, day, None, None)
-        #         result_ = self.db_conn.alarm_setting(alarm_data)
-        #         if result_ is False:
-        #             send_msg = "이미 알람이 설정되어 있습니다."
-        #             return_result = self.fixed_volume(response_header, send_msg)
-        #             self.send_message(client_socket, return_result)
-        #         else:
-        #             user_nick_name = self.db_conn.search_nickname(result_.user_id)
-        #             send_msg = f"{user_nick_name}님의 알람이 {result_.alarm_date}일 {result_.alarm_time}에 맞춰졌습니다."
-        #             return_result = self.fixed_volume(response_header, send_msg)
-        #             self.send_message(client_socket, return_result)
         elif request_header == self.send_chatbot:
             object_ = self.decoder.binary_to_obj(request_data)
             response_header = self.send_chatbot
+            if '삭제' in object_.send_msg and '수정' in object_.send_msg:
+                return_msg = '요청을 하나만 해주시길 바랍니다.'
+            elif '삭제' in object_.send_msg:
+                return_msg = self.time_set.alarm_del(object_)
+            elif '수정' in object_.send_msg:
+                return_msg = self.time_set.alarm_change(object_)
+            else:
+                return_msg = self.time_set.alarm_setting_info(object_)
             # 여기서 함수로 메시지 정보를 넘길꺼임 그리고 리턴으로 값을 받음
-            return_msg = self.time_set.msg_interpret_data(object_)
             print(return_msg)
             return_result = self.fixed_volume(response_header, return_msg)
             self.send_message(client_socket, return_result)
